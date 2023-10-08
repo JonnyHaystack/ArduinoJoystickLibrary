@@ -55,163 +55,62 @@
 #define JOYSTICK_TYPE_GAMEPAD              0x05
 #define JOYSTICK_TYPE_MULTI_AXIS           0x08
 
-class Joystick_
-{
-private:
+typedef enum {
+  HAT_CENTERED = 0,
+  HAT_UP = 1,
+  HAT_UP_RIGHT = 2,
+  HAT_RIGHT = 3,
+  HAT_DOWN_RIGHT = 4,
+  HAT_DOWN = 5,
+  HAT_DOWN_LEFT = 6,
+  HAT_LEFT = 7,
+  HAT_UP_LEFT = 8,
+} gamepad_hat_t;
 
-    // Joystick State
-    int32_t   _xAxis;
-    int32_t   _yAxis;
-    int32_t   _zAxis;
-    int32_t   _xAxisRotation;
-    int32_t   _yAxisRotation;
-    int32_t   _zAxisRotation;
-    int32_t   _throttle;
-    int32_t   _rudder;
-    int32_t   _accelerator;
-    int32_t   _brake;
-    int32_t   _steering;
-    int16_t    _hatSwitchValues[JOYSTICK_HATSWITCH_COUNT_MAXIMUM];
-    uint8_t   *_buttonValues = NULL;
+typedef struct {
+    uint16_t x; // X value of left analog stick
+    uint16_t y; // Y value of left analog stick
+    uint16_t z; // Value of analog left trigger
+    uint16_t rz; // Value of analog right trigger
+    uint16_t rx; // X value of right analog stick
+    uint16_t ry; // Y value of right analog stick
+    uint8_t hat; // Position value of the DPad/hat switch
+    uint16_t buttons; // Buttons mask for currently pressed buttons
+} gamepad_report_t;
 
-    // Joystick Settings
-    bool     _autoSendState;
-    uint8_t  _buttonCount;
-    uint8_t  _buttonValuesArraySize = 0;
-    uint8_t  _hatSwitchCount;
-    uint8_t  _includeAxisFlags;
-    uint8_t  _includeSimulatorFlags;
-    int32_t  _xAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _xAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _yAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _yAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _zAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _zAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _rxAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _rxAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _ryAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _ryAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _rzAxisMinimum = JOYSTICK_DEFAULT_AXIS_MINIMUM;
-    int32_t  _rzAxisMaximum = JOYSTICK_DEFAULT_AXIS_MAXIMUM;
-    int32_t  _rudderMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _rudderMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _throttleMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _throttleMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _acceleratorMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _acceleratorMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _brakeMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _brakeMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
-    int32_t  _steeringMinimum = JOYSTICK_DEFAULT_SIMULATOR_MINIMUM;
-    int32_t  _steeringMaximum = JOYSTICK_DEFAULT_SIMULATOR_MAXIMUM;
+class Joystick_ {
+  public:
+    Joystick_();
 
-    uint8_t   _hidReportId;
-    uint8_t   _hidReportSize; 
-
-protected:
-    int buildAndSet16BitValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, int32_t actualMinimum, int32_t actualMaximum, uint8_t dataLocation[]);
-    int buildAndSetAxisValue(bool includeAxis, int32_t axisValue, int32_t axisMinimum, int32_t axisMaximum, uint8_t dataLocation[]);
-    int buildAndSetSimulationValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, uint8_t dataLocation[]);
-
-public:
-    Joystick_(
-        uint8_t hidReportId = JOYSTICK_DEFAULT_REPORT_ID,
-        uint8_t joystickType = JOYSTICK_TYPE_JOYSTICK,
-        uint8_t buttonCount = JOYSTICK_DEFAULT_BUTTON_COUNT,
-        uint8_t hatSwitchCount = JOYSTICK_DEFAULT_HATSWITCH_COUNT,
-        bool includeXAxis = true,
-        bool includeYAxis = true,
-        bool includeZAxis = true,
-        bool includeRxAxis = true,
-        bool includeRyAxis = true,
-        bool includeRzAxis = true,
-        bool includeRudder = true,
-        bool includeThrottle = true,
-        bool includeAccelerator = true,
-        bool includeBrake = true,
-        bool includeSteering = true);
-
-    void begin(bool initAutoSendState = true);
+    void begin();
     void end();
+    bool ready();
+    void resetInputs();
+    void sendState();
     
-    // Set Range Functions
-    inline void setXAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _xAxisMinimum = minimum;
-        _xAxisMaximum = maximum;
-    }
-    inline void setYAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _yAxisMinimum = minimum;
-        _yAxisMaximum = maximum;
-    }
-    inline void setZAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _zAxisMinimum = minimum;
-        _zAxisMaximum = maximum;
-    }
-    inline void setRxAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _rxAxisMinimum = minimum;
-        _rxAxisMaximum = maximum;
-    }
-    inline void setRyAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _ryAxisMinimum = minimum;
-        _ryAxisMaximum = maximum;
-    }
-    inline void setRzAxisRange(int32_t minimum, int32_t maximum)
-    {
-        _rzAxisMinimum = minimum;
-        _rzAxisMaximum = maximum;
-    }
-    inline void setRudderRange(int32_t minimum, int32_t maximum)
-    {
-        _rudderMinimum = minimum;
-        _rudderMaximum = maximum;
-    }
-    inline void setThrottleRange(int32_t minimum, int32_t maximum)
-    {
-        _throttleMinimum = minimum;
-        _throttleMaximum = maximum;
-    }
-    inline void setAcceleratorRange(int32_t minimum, int32_t maximum)
-    {
-        _acceleratorMinimum = minimum;
-        _acceleratorMaximum = maximum;
-    }
-    inline void setBrakeRange(int32_t minimum, int32_t maximum)
-    {
-        _brakeMinimum = minimum;
-        _brakeMaximum = maximum;
-    }
-    inline void setSteeringRange(int32_t minimum, int32_t maximum)
-    {
-        _steeringMinimum = minimum;
-        _steeringMaximum = maximum;
-    }
-
-    // Set Axis Values
-    void setXAxis(int32_t value);
-    void setYAxis(int32_t value);
-    void setZAxis(int32_t value);
-    void setRxAxis(int32_t value);
-    void setRyAxis(int32_t value);
-    void setRzAxis(int32_t value);
-
-    // Set Simulation Values
-    void setRudder(int32_t value);
-    void setThrottle(int32_t value);
-    void setAccelerator(int32_t value);
-    void setBrake(int32_t value);
-    void setSteering(int32_t value);
-
-    void setButton(uint8_t button, uint8_t value);
     void pressButton(uint8_t button);
     void releaseButton(uint8_t button);
+    void setButton(uint8_t button, bool pressed);
+    void setButtons(uint16_t buttons);
+    void releaseAllButtons();
 
-    void setHatSwitch(int8_t hatSwitch, int16_t value);
+    void setLeftXAxis(uint8_t value);
+    void setLeftYAxis(uint8_t value);
+    void setRightXAxis(uint8_t value);
+    void setRightYAxis(uint8_t value);
+    void setLeftTrigger(uint8_t value);
+    void setRightTrigger(uint8_t value);
+    void setHatSwitch(gamepad_hat_t direction);
+    void setHatSwitch(bool left, bool right, bool down, bool up);
 
-    void sendState();
+  protected:
+    static const uint8_t _report_id = JOYSTICK_DEFAULT_REPORT_ID;
+    static const uint8_t _descriptor[];
+
+    gamepad_report_t _report;
+
+  private:
+    static gamepad_hat_t getHatDirection(bool left, bool right, bool down, bool up);
 };
 
 #endif // !defined(_USING_DYNAMIC_HID)

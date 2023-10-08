@@ -110,6 +110,7 @@ public:
   int begin(void);
   int SendReport(uint8_t id, const void* data, int len);
   void AppendDescriptor(DynamicHIDSubDescriptor* node);
+  uint8_t SendSpace() const { return USB_SendSpace(pluggedEndpoint); }
 
 protected:
   // Implementation of the PluggableUSBModule
